@@ -468,15 +468,50 @@ async function handleLogin() {
     alert(e.message);
   }
 }
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+
+// =====================
+// SIGNUP FUNCTION
+// =====================
 async function handleSignup() {
-  const email = document.getElementById("signup-id").value.trim();
+
+  const role = document.getElementById("signup-role").value;
+  const name = document.getElementById("signup-name").value.trim();
+  const identifier = document.getElementById("signup-id").value.trim();
   const password = document.getElementById("signup-pass").value;
+  const companyCode = document.getElementById("signup-code").value.trim();
 
   try {
-    await window.createUserWithEmailAndPassword(window.auth, email, password);
-    alert("Account created!");
-  } catch (e) {
-    alert(e.message);
+    const userCredential = await auth.createUserWithEmailAndPassword(identifier, password);
+
+    alert("Signup success!");
+
+    // continue your app login logic
+    onAuthSuccess({
+      account: {
+        name,
+        identifier,
+        role
+      },
+      company: {
+        code: companyCode
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    showAuthError("signup-error", error.message);
   }
 }
 async function handleForgotPassword() {
