@@ -483,7 +483,27 @@
       <img id="image-modal-img" src="" alt="" />
     </div>
   </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyDb-IwgphxkOAM5_aAhLd1cZEa11w7C4gE",
+    authDomain: "workpulse-5b60e.firebaseapp.com",
+    projectId: "workpulse-5b60e",
+    storageBucket: "workpulse-5b60e.firebasestorage.app",
+    messagingSenderId: "1052085420695",
+    appId: "1:1052085420695:web:3141bd052ba1ba17e49fd2",
+    measurementId: "G-4ZJVN8C68V"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.auth = auth;
+</script>
+
+<script src="script.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
