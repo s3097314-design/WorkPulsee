@@ -2,6 +2,17 @@
 // =====================
 // CONFIG
 // =====================
+const firebaseConfig = {
+  apiKey: "AIzaSyDb-IwgphxkOAM5_aAhLd1cZEa11w7C4gE",
+  authDomain: "workpulse-5b60e.firebaseapp.com",
+  projectId: "workpulse-5b60e",
+  storageBucket: "workpulse-5b60e.firebasestorage.app",
+  messagingSenderId: "1052085420695",
+  appId: "1:1052085420695:web:3141bd052ba1ba17e49fd2"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const RETIREMENT_AGE = 62;
 const RETIREMENT_WARN_YEARS = 5;
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
