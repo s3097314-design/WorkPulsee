@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorkPulse – HR Platform</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== AUTH SCREEN ===== -->
+  <div id="auth-screen">
+    <div class="auth-brand">
+      <span class="logo-icon">◆</span>
+      <span class="logo-text">WorkPulse</span>
+      <p class="auth-tagline">Enterprise HR — built for people.</p>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-card" id="login-panel">
+      <h2 class="auth-title" data-i18n="login_title">Welcome Back</h2>
+      <p class="auth-sub" data-i18n="login_sub">Sign in to your account</p>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="company_code_label">Company Code</label>
+        <input type="text" id="login-code" class="input" autocapitalize="characters" autocorrect="off" spellcheck="false" data-i18n-placeholder="company_code_placeholder" placeholder="e.g. AB12CD" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="login_id_label">Email or Phone Number</label>
+        <input type="text" id="login-id" class="input" autocapitalize="none" autocorrect="off" spellcheck="false" data-i18n-placeholder="login_id_placeholder" placeholder="Email or phone number" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="login_pass_label">Password</label>
+        <div class="input-eye-wrap">
+          <input type="password" id="login-pass" class="input" placeholder="Password" onkeydown="if(event.key==='Enter')handleLogin()" />
+          <button type="button" class="eye-btn" onclick="toggleEye('login-pass',this)">👁</button>
+        </div>
+      </div>
+      <div id="login-error" class="auth-error hidden"></div>
+      <button class="btn-primary" onclick="handleLogin()" data-i18n="login_btn">Sign In</button>
+      <p class="auth-switch" style="margin:0">
+        <button class="link-btn" onclick="showAuthPanel('forgot')" data-i18n="forgot_password">Forgot password?</button>
+      </p>
+      <p class="auth-switch">
+        <span data-i18n="no_account">Don't have an account?</span>
+        <button class="link-btn" onclick="showAuthPanel('signup')" data-i18n="go_signup">Create one</button>
+      </p>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="auth-card hidden" id="forgot-panel">
+      <h2 class="auth-title" data-i18n="forgot_title">Reset Password</h2>
+      <p class="auth-sub" data-i18n="forgot_sub">Enter your company code, email/phone and a new password.</p>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="company_code_label">Company Code</label>
+        <input type="text" id="forgot-code" class="input" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="e.g. AB12CD" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="login_id_label">Email or Phone Number</label>
+        <input type="text" id="forgot-id" class="input" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or phone number" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="forgot_new_pass_label">New Password</label>
+        <div class="input-eye-wrap">
+          <input type="password" id="forgot-pass" class="input" placeholder="New password (min 6 chars)" onkeydown="if(event.key==='Enter')handleForgotPassword()" />
+          <button type="button" class="eye-btn" onclick="toggleEye('forgot-pass',this)">👁</button>
+        </div>
+      </div>
+      <div id="forgot-error" class="auth-error hidden"></div>
+      <button class="btn-primary" onclick="handleForgotPassword()" data-i18n="forgot_btn">Reset Password</button>
+      <p class="auth-switch">
+        <button class="link-btn" onclick="showAuthPanel('login')" data-i18n="back_to_login">← Back to login</button>
+      </p>
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="auth-card hidden" id="signup-panel">
+      <h2 class="auth-title" data-i18n="signup_title">Create Account</h2>
+      <p class="auth-sub" data-i18n="signup_sub">Join your team on WorkPulse</p>
+
+      <div class="signup-mode">
+        <button type="button" class="mode-btn active" id="mode-join" onclick="setSignupMode('join')" data-i18n="mode_join">Join existing company</button>
+        <button type="button" class="mode-btn" id="mode-create" onclick="setSignupMode('create')" data-i18n="mode_create">Create new company</button>
+      </div>
+
+      <div class="form-group" id="company-name-group" style="display:none">
+        <label class="form-label" data-i18n="company_name_label">Company Name</label>
+        <input type="text" id="signup-company-name" class="input" placeholder="Your company" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="company_code_label">Company Code</label>
+        <input type="text" id="signup-code" class="input" autocapitalize="characters" autocorrect="off" spellcheck="false" data-i18n-placeholder="company_code_placeholder" placeholder="e.g. AB12CD" />
+        <p class="form-hint" id="company-code-hint" data-i18n="company_code_hint_join">Get the code from your HR.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup_name_label">Full Name</label>
+        <input type="text" id="signup-name" class="input" placeholder="Your full name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup_id_label">Email or Phone Number</label>
+        <input type="text" id="signup-id" class="input" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Email or phone number" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup_pass_label">Password</label>
+        <div class="input-eye-wrap">
+          <input type="password" id="signup-pass" class="input" placeholder="Create a password" />
+          <button type="button" class="eye-btn" onclick="toggleEye('signup-pass',this)">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup_dob_label">Date of Birth</label>
+        <input type="date" id="signup-dob" class="input" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="signup_role_label">Account Type</label>
+        <select id="signup-role" class="input">
+          <option value="employee" data-i18n="role_employee">Employee</option>
+          <option value="hr" data-i18n="role_hr">HR Manager</option>
+        </select>
+      </div>
+      <div id="signup-error" class="auth-error hidden"></div>
+      <button class="btn-primary" onclick="handleSignup()" data-i18n="signup_btn">Create Account</button>
+      <p class="auth-switch">
+        <span data-i18n="have_account">Already have an account?</span>
+        <button class="link-btn" onclick="showAuthPanel('login')" data-i18n="go_login">Sign in</button>
+      </p>
+    </div>
+
+    <div class="auth-bottom-row">
+      <div class="auth-lang">
+        <button onclick="setLang('en')" class="lang-btn">EN</button>
+        <button onclick="setLang('fr')" class="lang-btn">FR</button>
+        <button onclick="setLang('ar')" class="lang-btn">AR</button>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="app" class="hidden">
+
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">◆</span>
+          <span class="logo-text">WorkPulse</span>
+          <span class="company-pill" id="company-pill"></span>
+        </div>
+        <nav class="nav">
+          <button class="nav-btn active" id="btn-employee" onclick="showSection('employee')">
+            <span data-i18n="nav_employee">Employee Panel</span>
+          </button>
+          <button class="nav-btn hidden" id="btn-hr" onclick="showSection('hr')">
+            <span data-i18n="nav_hr">HR Dashboard</span>
+          </button>
+        </nav>
+        <div class="header-right">
+          <div class="lang-switcher">
+            <button onclick="setLang('en')" class="lang-btn">EN</button>
+            <button onclick="setLang('fr')" class="lang-btn">FR</button>
+            <button onclick="setLang('ar')" class="lang-btn">AR</button>
+          </div>
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+          <button class="notif-bell" id="notif-bell" onclick="toggleNotifs()" title="Notifications">
+            🔔<span class="notif-badge hidden" id="notif-badge">0</span>
+          </button>
+          <div class="user-chip" onclick="openAccountModal()" title="Manage account">
+            <span class="user-avatar" id="user-avatar">?</span>
+            <span id="user-name-display">User</span>
+            <button class="logout-btn" onclick="event.stopPropagation();handleLogout()" data-i18n="logout">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- NOTIF DROPDOWN -->
+    <div id="notif-panel" class="notif-panel hidden">
+      <div class="notif-header">
+        <strong data-i18n="notif_title">Notifications</strong>
+        <button class="link-btn" onclick="markAllNotifsRead()" data-i18n="notif_mark_read">Mark all read</button>
+      </div>
+      <div id="notif-list" class="notif-list"></div>
+    </div>
+
+    <main class="main">
+
+      <!-- EMPLOYEE PANEL -->
+      <section id="section-employee" class="section active">
+        <div class="section-title">
+          <h2 data-i18n="panel_title">Employee Panel</h2>
+          <p data-i18n="panel_subtitle">Your daily workspace — mood, vacation, and more.</p>
+        </div>
+
+        <div id="active-status-banner" class="active-banner hidden"></div>
+
+        <div class="cards-grid">
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">😊</span>
+              <h3 data-i18n="mood_title">Daily Mood</h3>
+            </div>
+            <p class="card-desc" data-i18n="mood_desc">How are you feeling today?</p>
+            <div class="mood-selector">
+              <button class="mood-btn" data-mood="sad" onclick="selectMood('sad')">😢 <span data-i18n="mood_sad">Sad</span></button>
+              <button class="mood-btn" data-mood="neutral" onclick="selectMood('neutral')">😐 <span data-i18n="mood_neutral">Neutral</span></button>
+              <button class="mood-btn" data-mood="happy" onclick="selectMood('happy')">😄 <span data-i18n="mood_happy">Happy</span></button>
+            </div>
+            <button class="btn-primary" onclick="submitMood()" data-i18n="mood_submit">Submit Mood</button>
+            <div id="mood-feedback" class="feedback-msg"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">✈️</span>
+              <h3 data-i18n="vacation_title">Vacation Request</h3>
+            </div>
+            <p class="card-desc" data-i18n="vacation_desc">Submit a leave request to HR.</p>
+            <div class="form-group">
+              <label class="form-label" data-i18n="from_label">From</label>
+              <input type="date" id="vacation-from" class="input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="to_label">To</label>
+              <input type="date" id="vacation-to" class="input" />
+            </div>
+            <div class="form-group">
+              <textarea id="vacation-reason" class="input textarea" rows="3" data-i18n-placeholder="vacation_reason_placeholder" placeholder="Reason for vacation..."></textarea>
+            </div>
+            <button class="btn-primary" onclick="submitVacation()" data-i18n="vacation_submit">Send Request</button>
+            <div id="vacation-feedback" class="feedback-msg"></div>
+            <div id="my-vacations" class="mini-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">📍</span>
+              <h3 data-i18n="mission_title">Mission Request</h3>
+            </div>
+            <p class="card-desc" data-i18n="mission_desc">Submit a work assignment or business trip request.</p>
+            <div class="form-group">
+              <label class="form-label" data-i18n="mission_destination_label">Destination</label>
+              <input type="text" id="mission-destination" class="input" data-i18n-placeholder="mission_destination_placeholder" placeholder="City / location" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="from_label">From</label>
+              <input type="date" id="mission-from" class="input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="to_label">To</label>
+              <input type="date" id="mission-to" class="input" />
+            </div>
+            <div class="form-group">
+              <textarea id="mission-reason" class="input textarea" rows="2" data-i18n-placeholder="mission_reason_placeholder" placeholder="Purpose of mission..."></textarea>
+            </div>
+            <button class="btn-primary" onclick="submitMission()" data-i18n="mission_submit">Submit Mission</button>
+            <div id="mission-feedback" class="feedback-msg"></div>
+            <div id="my-missions" class="mini-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">📎</span>
+              <h3 data-i18n="just_title">Submit Justification</h3>
+            </div>
+            <p class="card-desc" data-i18n="just_desc">Upload or take a photo of your medical certificate or other proof of absence.</p>
+            <div class="form-group">
+              <textarea id="just-reason" class="input textarea" rows="2" data-i18n-placeholder="just_reason_placeholder" placeholder="Reason (illness, appointment, etc.)..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="just_file_label">Photo of certificate</label>
+              <div class="file-input-wrap">
+                <label class="file-input-label" for="just-file">
+                  <span class="file-icon">📷</span>
+                  <span id="just-file-name" data-i18n="just_choose_file">Choose photo or take one</span>
+                </label>
+                <input type="file" id="just-file" accept="image/*" capture="environment" onchange="onJustFilePick(event)" />
+              </div>
+              <img id="just-preview" class="just-preview hidden" alt="" />
+            </div>
+            <button class="btn-primary" onclick="submitJustification()" data-i18n="just_submit">Submit Justification</button>
+            <div id="just-feedback" class="feedback-msg"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon">📬</span>
+              <h3 data-i18n="complaint_title">Anonymous Complaint</h3>
+            </div>
+            <p class="card-desc" data-i18n="complaint_desc">Submit feedback anonymously. Your identity is never stored.</p>
+            <div class="form-group">
+              <textarea id="complaint-text" class="input textarea" rows="4" data-i18n-placeholder="complaint_placeholder" placeholder="Write your complaint or suggestion..."></textarea>
+            </div>
+            <button class="btn-primary" onclick="submitComplaint()" data-i18n="complaint_submit">Submit Anonymously</button>
+            <div id="complaint-feedback" class="feedback-msg"></div>
+          </div>
+
+          <div class="card chat-card">
+            <div class="card-header">
+              <span class="card-icon">💬</span>
+              <h3 data-i18n="chat_title">Message HR</h3>
+            </div>
+            <div class="chat-box" id="chat-display"></div>
+            <div class="chat-input-row">
+              <input type="text" id="chat-input" class="input chat-input" data-i18n-placeholder="chat_placeholder" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendChat()" />
+              <button class="btn-send" onclick="sendChat()" data-i18n="chat_send">Send</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- HR DASHBOARD -->
+      <section id="section-hr" class="section">
+        <div class="section-title">
+          <h2 data-i18n="hr_title">HR Dashboard</h2>
+          <p data-i18n="hr_subtitle">Monitor team wellbeing and incoming requests.</p>
+          <div class="company-info-strip" id="company-info-strip"></div>
+        </div>
+
+        <div id="burnout-alert" class="burnout-alert hidden">
+          <span>⚠️</span>
+          <span data-i18n="burnout_warning">Burnout Risk Detected! Average mood is critically low. Take action now.</span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-employees">0</div>
+            <div class="stat-label" data-i18n="stat_employees">Employees</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-on-vacation">0</div>
+            <div class="stat-label" data-i18n="stat_on_vacation">On Vacation</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-on-mission">0</div>
+            <div class="stat-label" data-i18n="stat_on_mission">On Mission</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-avg-mood">—</div>
+            <div class="stat-label" data-i18n="stat_avg_mood">Average Mood</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-vacations">0</div>
+            <div class="stat-label" data-i18n="stat_pending_requests">Pending Requests</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-complaints">0</div>
+            <div class="stat-label" data-i18n="stat_complaints">Anonymous Reports</div>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-icon">📋</span><h3 data-i18n="hr_vacation_list">Vacation Requests</h3></div>
+            <div id="hr-vacations" class="list-container"><p class="empty-msg" data-i18n="empty">No data yet.</p></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-icon">📍</span><h3 data-i18n="hr_missions_list">Mission Requests</h3></div>
+            <div id="hr-missions" class="list-container"><p class="empty-msg" data-i18n="empty">No data yet.</p></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-icon">📎</span><h3 data-i18n="hr_just_list">Absence Justifications</h3></div>
+            <div id="hr-justifications" class="list-container"><p class="empty-msg" data-i18n="empty">No data yet.</p></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-icon">👥</span><h3 data-i18n="hr_directory">Employee Directory</h3></div>
+            <div id="hr-directory" class="list-container"><p class="empty-msg" data-i18n="empty">No data yet.</p></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-icon">🎂</span><h3 data-i18n="hr_retirement">Approaching Retirement</h3></div>
+            <div id="hr-retirement" class="list-container"><p class="empty-msg" data-i18n="empty">No data yet.</p></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-icon">📩</span><h3 data-i18n="hr_complaints_list">Anonymous Complaints</h3></div>
+            <div id="hr-complaints" class="list-container"><p class="empty-msg" data-i18n="empty">No data yet.</p></div>
+          </div>
+
+          <div class="card chat-card">
+            <div class="card-header"><span class="card-icon">💬</span><h3 data-i18n="hr_chat_list">Employee Messages</h3></div>
+            <div class="employee-tabs" id="hr-employee-tabs">
+              <p class="empty-msg" data-i18n="empty">No data yet.</p>
+            </div>
+            <div class="chat-box" id="hr-chat-display"></div>
+            <div class="chat-input-row hidden" id="hr-reply-row">
+              <input type="text" id="hr-reply-input" class="input chat-input" data-i18n-placeholder="hr_reply_placeholder" placeholder="Reply to employee..." onkeydown="if(event.key==='Enter')sendHrReply()" />
+              <button class="btn-send" onclick="sendHrReply()" data-i18n="hr_reply_btn">Reply</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-icon">📊</span><h3 data-i18n="hr_mood_log">Mood Log</h3></div>
+            <div id="hr-mood-log" class="list-container"></div>
+            <button class="btn-danger" onclick="clearAll()" data-i18n="clear_all">Clear All Data</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ACCOUNT MODAL -->
+  <div id="account-modal" class="modal-overlay hidden" onclick="closeAccountModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>⚙️</span> <span data-i18n="account_title">My Account</span></h3>
+        <button class="modal-close-btn" onclick="closeAccountModal()">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="name_label">Full Name</label>
+          <div class="modal-inline-row">
+            <input type="text" id="acct-name" class="input" placeholder="Your name" />
+            <button class="btn-send" onclick="saveAccountName()" data-i18n="save_btn">Save</button>
+          </div>
+          <div id="acct-name-msg" class="feedback-msg"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="signup_dob_label">Date of Birth</label>
+          <div class="modal-inline-row">
+            <input type="date" id="acct-dob" class="input" />
+            <button class="btn-send" onclick="saveAccountDob()" data-i18n="save_btn">Save</button>
+          </div>
+          <div id="acct-dob-msg" class="feedback-msg"></div>
+        </div>
+
+        <div class="modal-divider"></div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="cur_pass_label">Current Password</label>
+          <input type="password" id="acct-cur-pass" class="input" placeholder="Enter current password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="new_pass_label">New Password</label>
+          <input type="password" id="acct-new-pass" class="input" placeholder="New password (min 6 chars)" />
+        </div>
+        <button class="btn-primary" onclick="saveAccountPassword()" data-i18n="change_pass_btn">Change Password</button>
+        <div id="acct-pass-msg" class="feedback-msg"></div>
+
+        <div id="acct-hr-section" class="hidden">
+          <div class="modal-divider"></div>
+          <label class="form-label" style="display:block;margin-bottom:8px" data-i18n="manage_users">Manage Employee Accounts</label>
+          <div id="acct-user-list" class="list-container" style="max-height:200px"></div>
+        </div>
+
+        <div class="modal-divider"></div>
+        <button class="btn-danger" onclick="confirmDeleteAccount()" data-i18n="delete_my_acct">🗑 Delete My Account</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirm-modal" class="modal-overlay hidden" onclick="closeConfirm(event)">
+    <div class="modal-box confirm-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>⚠️</span> <span data-i18n="confirm_title">Are you sure?</span></h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message" class="confirm-text">Are you sure?</p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" onclick="closeConfirm()" data-i18n="confirm_cancel">Cancel</button>
+          <button class="btn-danger" id="confirm-ok" onclick="acceptConfirm()" data-i18n="confirm_yes">Yes, confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE VIEWER MODAL -->
+  <div id="image-modal" class="modal-overlay hidden" onclick="closeImageModal(event)">
+    <div class="image-modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close-btn image-close" onclick="closeImageModal()">✕</button>
+      <img id="image-modal-img" src="" alt="" />
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
