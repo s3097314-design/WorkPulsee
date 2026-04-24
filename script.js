@@ -1,18 +1,6 @@
-
 // =====================
 // CONFIG
 // =====================
-const firebaseConfig = {
-  apiKey: "AIzaSyDb-IwgphxkOAM5_aAhLd1cZEa11w7C4gE",
-  authDomain: "workpulse-5b60e.firebaseapp.com",
-  projectId: "workpulse-5b60e",
-  storageBucket: "workpulse-5b60e.firebasestorage.app",
-  messagingSenderId: "1052085420695",
-  appId: "1:1052085420695:web:3141bd052ba1ba17e49fd2"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const RETIREMENT_AGE = 62;
 const RETIREMENT_WARN_YEARS = 5;
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -344,10 +332,7 @@ async function api(path, opts = {}) {
   if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
   let resp;
   try { resp = await fetch(API + path, init); }
- catch (e) {
-  console.log("SIGNUP ERROR:", e);
-  showAuthError("signup-error", e.message || e);
-}
+  catch (e) { throw { error: "network", message: String(e) }; }
   let data = null;
   try { data = await resp.json(); } catch {}
   if (!resp.ok) throw { status: resp.status, ...(data || {}) };
@@ -458,62 +443,44 @@ function mapAuthError(err) {
 // LOGIN / SIGNUP / SESSION
 // =====================
 async function handleLogin() {
-  const email = document.getElementById("login-id").value.trim();
+  const companyCode = document.getElementById("login-code").value.trim();
+  const identifier = document.getElementById("login-id").value.trim().toLowerCase();
   const password = document.getElementById("login-pass").value;
-
+  if (!companyCode || !identifier || !password) { showAuthError("login-error", t("err_login_invalid")); return; }
   try {
-    await window.signInWithEmailAndPassword(window.auth, email, password);
-    launchApp();
+    const r = await api("/auth/login", { method: "POST", body: { companyCode, identifier, password } });
+    onAuthSuccess(r);
   } catch (e) {
-    alert(e.message);
+    showAuthError("login-error", mapAuthError(e));
   }
 }
-const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
-};
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-
-// =====================
-// SIGNUP FUNCTION
-// =====================
 async function handleSignup() {
-
   const role = document.getElementById("signup-role").value;
   const name = document.getElementById("signup-name").value.trim();
-  const identifier = document.getElementById("signup-id").value.trim();
+  const identifier = document.getElementById("signup-id").value.trim().toLowerCase();
   const password = document.getElementById("signup-pass").value;
-  const companyCode = document.getElementById("signup-code").value.trim();
+  const dob = document.getElementById("signup-dob").value;
+  let companyCode = document.getElementById("signup-code").value.trim();
+  const companyName = document.getElementById("signup-company-name").value.trim();
+
+  if (!name || !identifier || !password || !companyCode) { showAuthError("signup-error", t("err_signup_empty")); return; }
+  if (password.length < 6) { showAuthError("signup-error", t("err_pass_short")); return; }
+  if (signupMode === "create") {
+    if (role !== "hr") { showAuthError("signup-error", t("err_create_company_hr")); return; }
+    if (!companyName) { showAuthError("signup-error", t("err_signup_empty")); return; }
+  }
 
   try {
-    const userCredential = await auth.createUserWithEmailAndPassword(identifier, password);
-
-    alert("Signup success!");
-
-    // continue your app login logic
-    onAuthSuccess({
-      account: {
-        name,
-        identifier,
-        role
-      },
-      company: {
-        code: companyCode
-      }
-    });
-
-  } catch (error) {
-    console.error(error);
-    showAuthError("signup-error", error.message);
+    const body = { name, identifier, password, role, dob: dob || null, companyCode };
+    if (signupMode === "create") body.companyName = companyName;
+    const r = await api("/auth/signup", { method: "POST", body });
+    onAuthSuccess(r);
+  } catch (e) {
+    showAuthError("signup-error", mapAuthError(e));
   }
 }
+
 async function handleForgotPassword() {
   const companyCode = document.getElementById("forgot-code").value.trim();
   const identifier = document.getElementById("forgot-id").value.trim().toLowerCase();
