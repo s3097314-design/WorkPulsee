@@ -1,5 +1,4 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
 // =====================
 // CONFIG
 // =====================
@@ -448,53 +447,27 @@ function mapAuthError(err) {
 // LOGIN / SIGNUP / SESSION
 // =====================
 async function handleLogin() {
- async function handleLogin() {
   const email = document.getElementById("login-id").value.trim();
   const password = document.getElementById("login-pass").value;
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
-
   try {
-    const user = await signInWithEmailAndPassword(window.auth, email, password);
-    
-    // simulate your old success behavior
-    me = { name: email };
-    company = { name: "Demo Company" };
-
-    launchApp(); // your existing function
-  } catch (e) {
-    alert("Login failed: " + e.message);
-  }
-}
-async function handleSignup() {
-  async function handleSignup() {
-  const email = document.getElementById("signup-id").value.trim();
-  const password = document.getElementById("signup-pass").value;
-
-  if (!email || !password) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  if (password.length < 6) {
-    alert("Password must be at least 6 characters");
-    return;
-  }
-
-  try {
-    await createUserWithEmailAndPassword(window.auth, email, password);
-    alert("Account created successfully!");
-    
-    // OPTIONAL: auto login UI
-    showAuthPanel("login");
+    await window.signInWithEmailAndPassword(window.auth, email, password);
+    launchApp();
   } catch (e) {
     alert(e.message);
   }
 }
+async function handleSignup() {
+  const email = document.getElementById("signup-id").value.trim();
+  const password = document.getElementById("signup-pass").value;
 
+  try {
+    await window.createUserWithEmailAndPassword(window.auth, email, password);
+    alert("Account created!");
+  } catch (e) {
+    alert(e.message);
+  }
+}
 async function handleForgotPassword() {
   const companyCode = document.getElementById("forgot-code").value.trim();
   const identifier = document.getElementById("forgot-id").value.trim().toLowerCase();
