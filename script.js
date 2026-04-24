@@ -1,3 +1,5 @@
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 // =====================
 // CONFIG
 // =====================
@@ -446,41 +448,50 @@ function mapAuthError(err) {
 // LOGIN / SIGNUP / SESSION
 // =====================
 async function handleLogin() {
-  const companyCode = document.getElementById("login-code").value.trim();
-  const identifier = document.getElementById("login-id").value.trim().toLowerCase();
+ async function handleLogin() {
+  const email = document.getElementById("login-id").value.trim();
   const password = document.getElementById("login-pass").value;
-  if (!companyCode || !identifier || !password) { showAuthError("login-error", t("err_login_invalid")); return; }
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
+
   try {
-    const r = await api("/auth/login", { method: "POST", body: { companyCode, identifier, password } });
-    onAuthSuccess(r);
+    const user = await signInWithEmailAndPassword(window.auth, email, password);
+    
+    // simulate your old success behavior
+    me = { name: email };
+    company = { name: "Demo Company" };
+
+    launchApp(); // your existing function
   } catch (e) {
-    showAuthError("login-error", mapAuthError(e));
+    alert("Login failed: " + e.message);
   }
 }
-
 async function handleSignup() {
-  const role = document.getElementById("signup-role").value;
-  const name = document.getElementById("signup-name").value.trim();
-  const identifier = document.getElementById("signup-id").value.trim().toLowerCase();
+  async function handleSignup() {
+  const email = document.getElementById("signup-id").value.trim();
   const password = document.getElementById("signup-pass").value;
-  const dob = document.getElementById("signup-dob").value;
-  let companyCode = document.getElementById("signup-code").value.trim();
-  const companyName = document.getElementById("signup-company-name").value.trim();
 
-  if (!name || !identifier || !password || !companyCode) { showAuthError("signup-error", t("err_signup_empty")); return; }
-  if (password.length < 6) { showAuthError("signup-error", t("err_pass_short")); return; }
-  if (signupMode === "create") {
-    if (role !== "hr") { showAuthError("signup-error", t("err_create_company_hr")); return; }
-    if (!companyName) { showAuthError("signup-error", t("err_signup_empty")); return; }
+  if (!email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  if (password.length < 6) {
+    alert("Password must be at least 6 characters");
+    return;
   }
 
   try {
-    const body = { name, identifier, password, role, dob: dob || null, companyCode };
-    if (signupMode === "create") body.companyName = companyName;
-    const r = await api("/auth/signup", { method: "POST", body });
-    onAuthSuccess(r);
+    await createUserWithEmailAndPassword(window.auth, email, password);
+    alert("Account created successfully!");
+    
+    // OPTIONAL: auto login UI
+    showAuthPanel("login");
   } catch (e) {
-    showAuthError("signup-error", mapAuthError(e));
+    alert(e.message);
   }
 }
 
