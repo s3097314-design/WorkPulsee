@@ -332,7 +332,10 @@ async function api(path, opts = {}) {
   if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
   let resp;
   try { resp = await fetch(API + path, init); }
-  catch (e) { throw { error: "network", message: String(e) }; }
+ catch (e) {
+  console.log("SIGNUP ERROR:", e);
+  showAuthError("signup-error", e.message || e);
+}
   let data = null;
   try { data = await resp.json(); } catch {}
   if (!resp.ok) throw { status: resp.status, ...(data || {}) };
